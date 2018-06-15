@@ -2,43 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("Abstract Sprite/Sprite Group")]
 public class AbstractSpriteGroup : MonoBehaviour
 {
-    private AbstractSpriteRenderer spriteRenderer;
-    public int layer = 0;
-    public List<AbstractSprite> spriteLayer = null;
+    private AbstractSpriteRenderer baseRenderer;
+    public AbstractSprite[] parts;
 
-    private Color[] cols;
+    private bool isInitialized = false;
 
-    private Vector2Int point;
-
-    public static int SortByLayer(AbstractSpriteGroup groupA, AbstractSpriteGroup groupB)
+    public void Init(AbstractSpriteRenderer mRenderer)
     {
-        return groupA.layer.CompareTo(groupB.layer);
+        if (!isInitialized)
+        {
+            baseRenderer = mRenderer;
+            isInitialized = true;
+        }
     }
 
-    public void SetRenderer(AbstractSpriteRenderer asr) { spriteRenderer = asr; }
-
-    public void Draw(ref Color[] cols, Vector3 worldPos)
+    public void Draw(Mesh targetMesh)
     {
-        //cols = targetTexture.GetPixels();
-
-        for (int i = spriteLayer.Count-1; i >= 0; i--)
+        if (isInitialized)
         {
-            if (spriteLayer[i] != null)
+            for (int i = 0; i < parts.Length; i++)
             {
-                if (spriteLayer[i].enabled)
-                {
-                    for (int c = 0; c < cols.Length; c++)
-                    {
-                        point.Set(c % spriteRenderer.spriteSize.x, c / spriteRenderer.spriteSize.y);
-                        if (cols[c] == Color.clear)
-                        {
-                            if (spriteLayer[i].CheckPixel(point, worldPos, spriteRenderer.spriteSize)) cols[c] = spriteLayer[i].spriteColor;
-                        }
-                    }
-                    //targetTexture.SetPixels(cols);
-                }
+                parts[i].Draw(targetMesh, baseRenderer.transform.position);
             }
         }
     }
