@@ -5,7 +5,6 @@
         _MainTex ("Texture", 2D) = "white" {}
 		_PixelCountU("Pixel Count U", float) = 960
 		_PixelCountV("Pixel Count V", float) = 540
-		_Cutoff("Base Alpha cutoff", Range(0,.9)) = .5
     }
     SubShader
     {
@@ -61,11 +60,10 @@
             v2f vert (appdata v)
             {
                 v2f o;
-                
-				
+
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				o.vertex.x = (o.vertex.x);
-				//o.vertex.y = floor(o.vertex.y);
+				o.vertex.x = (floor(o.vertex.x*_PixelCountU)) / _PixelCountU;
+				o.vertex.y = (floor(o.vertex.y*_PixelCountV)) / _PixelCountV;
 
 				o.screenPos = mul(unity_ObjectToWorld, v.vertex);
 				o.color = v.color;
@@ -76,39 +74,15 @@
             
             fixed4 frag (v2f i) : SV_Target
             {
-				//float pixelWidth = 1.0f / _PixelCountU;
-				//float pixelHeight = 1.0f / _PixelCountV;
-
-                // sample the texture
-				//fixed4 u = tex2D(_MainTex, i.uv + fixed2(0, pixelHeight));
-				//fixed4 d = tex2D(_MainTex, i.uv - fixed2(0, pixelHeight));
-				//fixed4 r = tex2D(_MainTex, i.uv + fixed2(pixelWidth, 0));
-				//fixed4 l = tex2D(_MainTex, i.uv - fixed2(pixelWidth, 0));
-                //fixed4 col = tex2D(_MainTex, i.uv);
-				//col.r *= 0.75;
-				//float alphaclip = 1;
-				
-				
-				float2 uv = i.uv;
-				half4 col = tex2D(_MainTex, uv);
-
-				//fixed4 c = tex2D(_MainTex, IN.uv_MainTex);
-				//if (col.a < 0.8) alphaclip = -1;
-
-				//i.vertex.xy /= _PixelCountU;
-				//i.vertex.xy = i.vertex.xy * 0.5 + 0.5;
-
-				col.rgb = i.color.xyz;
-
-
-				// clip HLSL instruction stops rendering a pixel if value is negative
-				//clip(alphaclip);
+				half4 col = tex2D(_MainTex, i.uv);
+				col.rgb = i.color.xyz;//Apply Vertex Color
 
                 // apply fog
-                //UNITY_APPLY_FOG(i.fogCoord, col);
+                UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
             ENDCG
         }
     }
+	FallBack "Diffuse"
 }

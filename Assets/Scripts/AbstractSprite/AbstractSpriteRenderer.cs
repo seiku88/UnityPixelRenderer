@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 [ExecuteInEditMode]
+[AddComponentMenu("Abstract Sprite/Sprite Renderer")]
 public class AbstractSpriteRenderer : MonoBehaviour
 {
     public bool updateInRealTime = false;
@@ -30,10 +31,24 @@ public class AbstractSpriteRenderer : MonoBehaviour
         targetMesh.MarkDynamic();
         targetRenderer.material = new Material(Shader.Find("Hidden/AbstractSpriteBaseShader"));
 
+        sprites = new List<AbstractSpriteGroup>();
+        UpdateGroupList();
+    }
+
+    protected void UpdateGroupList()
+    {
+        sprites.Clear();
+        sprites.InsertRange(0, gameObject.transform.GetComponentsInChildren<AbstractSpriteGroup>());
+
         for (int i = 0; i < sprites.Count; i++)
         {
             sprites[i].Init(this);
         }
+    }
+
+    protected void OnTransformChildrenChanged()
+    {
+        UpdateGroupList();
     }
 
     // Update is called once per frame
